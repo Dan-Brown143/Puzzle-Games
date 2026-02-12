@@ -16,7 +16,7 @@ GRID_OFFSET_X = 50
 GRID_OFFSET_Y = 100
 
 #Light Mode Colours
-Light_Colours = {
+LIGHT_COLOURS = {
     'background': (250, 250, 250),
     'grid_bg': (255, 255, 255),
     'grid_lines': (200, 200, 200),
@@ -34,7 +34,7 @@ Light_Colours = {
 
 #Dark Mode Colours
 
-Dark_Colours = {
+DARK_COLOURS = {
     'background': (30, 30, 35),
     'grid_bg': (45, 45, 50),
     'grid_lines': (70, 70, 75),
@@ -267,3 +267,93 @@ class Checkbox:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.pygame.Rect.collidepoint(event.pos):
                 self.checked = not self.checked
+
+class CrosswordGame:
+    def __init__(self):
+        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        pygame.display.set_caption("Crossword Puzzle")
+        self.clock = pygame.time.clock()
+
+        #Theme
+
+        self.dark_mode = False
+        self.colours = LIGHT_COLOURS.copy()
+        
+        #Load words
+        self.all_words = self.load_words()
+        self.categories = list(set(word['category'] for word in self.all_words))
+
+        #Game state
+        self.state = 'menu'
+        self.generator = None
+        self.user_grid = None
+        self.selected_cell = None
+        self.selected_word = None
+        
+        #UI
+        self.create_menu_ui()
+
+    def load_words(self) -> List[Dict]:
+        try:
+            with open('crossword_words.json', 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            #Defaults if the word file doesnt exist
+            return [
+                {"word": "python", "clue": "Popular programming language", "category": "Technology"},
+                {"word": "game", "clue": "Something played for fun", "category": "Entertainment"},
+                {"word": "puzzle", "clue": "Brain teaser", "category": "Entertainment"},
+                {"word": "computer", "clue": "Electronic device for processing data", "category": "Technology"},
+                {"word": "music", "clue": "Organized sound", "category": "Arts"},
+                {"word": "science", "clue": "Study of the natural world", "category": "Education"},
+                {"word": "history", "clue": "Study of past events", "category": "Education"},
+                {"word": "guitar", "clue": "Six-stringed instrument", "category": "Arts"},
+                {"word": "soccer", "clue": "Popular sport played with feet", "category": "Sports"},
+                {"word": "basketball", "clue": "Sport with hoops and a ball", "category": "Sports"},
+                {"word": "painting", "clue": "Art created with colors", "category": "Arts"},
+                {"word": "novel", "clue": "Long fictional story", "category": "Entertainment"},
+                {"word": "ocean", "clue": "Large body of salt water", "category": "Nature"},
+                {"word": "mountain", "clue": "Large natural elevation", "category": "Nature"},
+                {"word": "forest", "clue": "Large area covered with trees", "category": "Nature"},
+            ]
+        
+    def create_menu_ui(self):
+        self.category_checkboxes = []
+        y_offset = 200
+        for i, category in enumerate(self.categories):
+            checkbox = Checkbox(100, y_offset + i * 40, category, checked=False)
+            self.category_checkboxes.append(checkbox)
+
+        self.start_button = Button(100, y_offset + len(self.categories) * 40 + 40, 200, 50, "Start Game", self.start_game)
+        self.theme_button = Button(320, y_offset + len(self.categories) * 40 + 40, 200, 50, "Toggle Theme", self.toggle_theme)
+
+    def toggle_theme(self):
+        self.dark_mode = not self.dark_mode
+        self.colours = DARK_COLOURS.copy() if self.dark_mode else LIGHT_COLOURS.copy()
+
+    def start_game(self):
+        selected_categories = [cb.text for cb in self.category_checkboxes if cb.checked]
+
+        if selected_categories:
+             available_words = [w for w in self.all_words if w['category'] in selected_categories]
+        else:
+            available_words = self.all_words
+
+        if not available_words:
+            print("No words are available for the selected categories")
+            return
+        
+        self.generator = CrosswordGenerator(available_words, GRID_SIZE)
+        success = self.generator.generate(num_words=12)
+
+        if success:
+            self.user_grid = [['' if self.generator.grid[r][c] != '#' else '#'
+                               for c in range(GRID_SIZE)] for r in range(GRID_SIZE)]
+            self.selected_cell = None
+            self.selected_word = None
+            self.state = 'playing'
+        else:
+            print("Failed to generate the puzzle, trying again")
+            self.start_game()
+
+    def draw_menu(self):
