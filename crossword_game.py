@@ -234,3 +234,36 @@ class Button:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if self.hovered:
                 self.action()
+
+class Checkbox:
+    def __init__(self, x: int, y: int, text: str, checked: bool = False):
+        self.rect = pygame.Rect(x, y, 20, 20)
+        self.text = text
+        self.checked - checked
+        self.hovered = False
+
+    def draw(self, screen, colours):
+        #Draw box
+        pygame.draw.rect(screen, colours['grid_bg'], self.rect)
+        pygame.draw.rect(screen, colours['text'], self.rect, 2)
+
+        #Draw checkmarks if checked
+        if self.checked:
+            pygame.draw.line(screen, colours['text'],
+                             (self.rect.x + 4, self.rect.y + 10),
+                             (self.rect.x + 8, self.rect.y + 16), 3)
+            pygame.draw.line(screen, colours['text'],
+                             (self.rect.x + 4, self.rect.y + 16),
+                             (self.rect.x + 16, self.rect.y + 4), 3)
+            
+        #Draw text
+        font = pygame.font.Font(None, 24)
+        text_surface = font.render(self.text, True, colours['text'])
+        screen.blit(text_surface, (self.rect.x + 30, self.rect.y))
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEMOTION:
+            self.hovered = self.rect.pygame.Rect.collidepoint(event.pos)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.pygame.Rect.collidepoint(event.pos):
+                self.checked = not self.checked
