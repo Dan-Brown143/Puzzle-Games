@@ -8,12 +8,12 @@ from typing import List, Dict, Tuple, Optional
 pygame.init()
 
 #Constants
-windowWidth = 200
-windowHeight = 800
-cellSize = 40
-gridSize = 15
-gridOffsetX = 50
-gridOffsetY = 100
+WINDOW_WIDTH = 200
+WINDOW_HEIGHT = 800
+CELL_SIZE = 40
+GRID_SIZE = 15
+GRID_OFFSET_X = 50
+GRID_OFFSET_Y = 100
 
 #Light Mode Colours
 Light_Colours = {
@@ -210,3 +210,27 @@ class CrosswordGenerator:
             for col in range(self.grid_size):
                 if self.grid[row][col] == ' ':
                     self.grid[row][col] = '#'
+
+class Button:
+    def __init__(self, x: int, y: int, width: int, height: int, text: str, action):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.action = action
+        self.hovered = False
+
+    def draw(self, screen, colours):
+        colour = colours['button_hover'] if self.hovered else colours['button']
+        pygame.draw.rect(screen, colour, self.rect, border_radius = 5)
+        pygame.draw.rect(screen, colours['text'], self.rect, 2, border_radius = 5)
+        
+        font = pygame.font.Font(None, 28)
+        text_surface = font.render(self.text, True, colours['button_text'])
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        screen.blit(text_surface, text_rect)
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEMOTION:
+            self.hovered = self.rect.pygame.Rect.collidepoint(event.pos)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if self.hovered:
+                self.action()
