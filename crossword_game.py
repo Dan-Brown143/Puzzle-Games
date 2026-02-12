@@ -50,3 +50,12 @@ Dark_Colours = {
     'button_text': (240, 240, 240),
 }
 
+class CrosswordWord:
+    def __init__(self, word: str, clue: str, row: int, col: int, direction: str, number: int):
+        self.word = word.upper()
+        self.clue = clue
+        self.row = row
+        self.col = col
+        self.direction = direction
+        self.number = number
+
