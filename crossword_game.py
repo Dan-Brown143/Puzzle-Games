@@ -191,7 +191,7 @@ class CrosswordGenerator:
                 #Try random positions
                 for _ in range(attempts_per_word):
                     row = random.randint(0, self.grid_size - 1)
-                    col = random.randint(o, self.grid - 1)
+                    col = random.randint(0, self.grid - 1)
                     direction = random.choice(['across', 'down'])
 
                     if self.can_place_word(word, row, col, direction):
