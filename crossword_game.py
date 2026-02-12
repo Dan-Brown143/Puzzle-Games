@@ -357,3 +357,69 @@ class CrosswordGame:
             self.start_game()
 
     def draw_menu(self):
+        self.screen.fill(self.colours['background'])
+
+        #Title
+        font_title = pygame.font.Font(None, 64)
+        title = font_title.render("Crossword Puzzle", True, self.colours['text'])
+        self.screen.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, 50))
+
+        #Instructions
+        font_small = pygame.font.Font(None, 28)
+        instructions = font_small.render("Select categories (or none for any word):", True, self.colours['text'])
+        self.screen.blit(instructions, (100, 150))
+
+        #Draw the checkboxes
+        for checkbox in self.category_checkboxes:
+            checkbox.draw(self.screen, self.colours)
+
+        #Draw the buttons
+        self.start_button.draw(self.screen, self.colours)
+        self.theme_button.draw(self.screen, self.colours)
+
+    def draw_grid(self):
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                x = GRID_OFFSET_X + col * CELL_SIZE
+                y = GRID_OFFSET_Y + row * CELL_SIZE
+                cell = self.generator.grid[row][col]
+
+                if cell == '#':
+                    pygame.draw.rect(self.screen, self.colours['cell_blocked'],
+                                     (x, y, CELL_SIZE, CELL_SIZE))
+                else:
+                    colour = self.colours['grid_bg']
+
+                    if self.selected_cell and self.selected_cell == (row, col):
+                        colour = self.colours['cell_selected']
+                    elif self.selected_word:
+                        word = self.selected_word
+                        if word.direction == 'across':
+                            if row == word.row and word.col <= col < word.col + len(word.word):
+                                colour = self.colours['cell_filled']
+                        else:
+                            if col == word.col and word.row <= row < word.row + len(word.word):
+                                colour = self.colours['cell_filled']
+
+                pygame.draw.rect(self.screen, colour, (x, y, CELL_SIZE, CELL_SIZE))
+                pygame.draw.rect(self.screen, self.colours['grid_lines'],
+                                 (x, y, CELL_SIZE, CELL_SIZE), 1)
+                
+                #Draw users letter
+                user_letter = self.user_grid[row][col]
+                if user_letter and user_letter != '#':
+                    font = pygame.font.Font(None, 32)
+                    if user_letter == cell:
+                        text_colour = self.colours['text']
+                    else:
+                        text_colour = self.colours['cell_incorrect']
+                    text = font.render(user_letter, True, text_colour)
+                    text_rect = text.get_rect(center=(x + CELL_SIZE // 2, y + CELL_SIZE // 2))
+                    self.screen.blit(text, text_rect)
+
+                #Draw word numbers
+                for word in self.generator.placed_words:
+                    if word.row == row and word.col == col:
+                        font_small = pygame.font.Font(None, 18)
+                        number = font_small.render(str(word.number), True, self.colours['number_text'])
+                        self.screen.blit(number, (x + 2, y + 2))
