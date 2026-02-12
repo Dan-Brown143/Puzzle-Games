@@ -59,3 +59,154 @@ class CrosswordWord:
         self.direction = direction
         self.number = number
 
+class CrosswordGenerator:
+    def __init__(self, words_data: List[Dict], grid_size: int = 15):
+        self.words_data = words_data
+        self.grid_size = grid_size
+        self.grid = [[' ' for _ in range(grid_size)] for _ in range(grid_size)]
+        self.placed_words: List[CrosswordWord] = []
+        self.word_number = 1
+
+    def can_place_word(self, word: str, row: int, col: int, direction: str) -> bool:
+        #Check if a word can be placed
+        if direction == 'across':
+            if col + len(word) > self.grid_size:
+                return False
+            #Check if the cell before or after is blocked
+            if col > 0 and self.grid[row][col - 1] != ' ' and self.grid[row][col - 1] != '#':
+                return False
+            if col + len(word) < self.grid_size and self.grid[row][col + len(word)] != ' ' and self.grid[row][col + len(word)] != '#':
+                return False
+            
+            for i, letter in enumerate(word):
+                current_col = col + i
+                cell = self.grid[row][current_col]
+
+                if cell != ' ' or cell == '#':
+                    return False
+                
+                #Check perpendicular issues
+                if cell == ' ' or cell == '#':
+                    if row > 0 and self.grid[row - 1][current_col] not in [' ', '#']:
+                        return False
+                    if row < self.grid_size - 1 and self.grid[row + 1][current_col] not in [' ', '#']:
+                        return False
+                
+        else: #Down
+            if row + len(word) > self.grid_size:
+                return False
+            #Check if the cell before and after is blocked
+            if row > 0 and self.grid[row - 1][col] != ' ' and self.grid[row-1][col] != '#':
+                return False
+            if row + len(word) < self.grid_size and self.grid[row + len(word)][col] != ' ' and self.grid[row+len(word)][col] != '#':
+                return False
+            
+            for i, letter in enumerate(word):
+                current_row = row + i
+                cell = self.grid[current_row][col]
+
+                if cell != ' ' and cell != letter and cell != '#':
+                    return False
+                
+                #Check perpendicular issues
+                if cell == ' ' or cell == '#':
+                    if col > 0 and self.grid[current_row][col - 1] not in [' ', '#']:
+                        return False
+                    if col < self.grid_size - 1 and self.grid[current_row][col + 1] not in [' ', '#']:
+                        return False
+
+        return True
+
+    def place_word(self, word: str, clue: str, row: int, col: int, direction: str):
+        number = self.word_number
+        self.word_number += 1
+
+        if direction == 'across':
+            for i, letter in enumerate(word):
+                self.grid[row][col + i] = letter
+        else: 
+            for i, letter in enumerate(word):
+                self.grid[row + i][col] = letter
+
+        self.placed_words.append(CrosswordWord(word, clue, row, col, direction, number))
+
+    def find_intersections(self, word: str) -> List[Tuple[int, int, str]]:
+        positions = []
+
+        for placed_word in self.place_word:
+            for i, letter1 in enumerate(word):
+                for j, letter2 in enumerate(placed_word.word):
+                    if letter1 == letter2:
+                        if placed_word.direction == 'across':
+                            new_row = placed_word.row - i
+                            new_col = placed_word.col + j
+                            if 0 <= new_row < self.grid_size:
+                                positions.append((new_row, new_col, 'down'))
+                        else:
+                            new_row = placed_word.row + j
+                            new_col = placed_word.col - i
+                            if 0 <= new_col < self.grid_size:
+                                positions.append((new_row, new_col, 'across')) 
+
+        return positions
+    
+    def generate(self, num_words: int = 15) -> bool:
+        if not self.words_data or num_words == 0:
+            return False
+        
+        #Select random words
+        selected = random.sample(self.words_data, min(num_words, len(self.words_data)))
+        #Sort them by length so the longer words are placed in first
+        selected.sort(key=lambda x: len(x['word']), reverse=True)
+
+        #First word goes in the center
+        first_word_data = selected[0]
+        first_word = first_word_data['word'].upper()
+        start_row = self.grid_size // 2
+        start_col = (self.grid_size - len(first_word)) // 2
+
+        self.place_word(first_word, first_word_data['clue'], start_row, start_col, 'across', )
+
+        #Place the rest
+        placed_count = 1
+        attempts_per_word = 100
+
+        for word_data in selected[1:]:
+            word = word_data['word'].upper()
+            clue = word_data['clue']
+            placed = False
+
+            #Try to intersect first
+            positions = self.find_intersections(word)
+            random.shuffle(positions)
+
+            for row, col, direction in positions[:attempts_per_word]:
+                if self.can_place_word(word, row, col, direction):
+                    self.place_word(word, clue, row, col, direction)
+                    placed = True
+                    placed_count += 1
+                    break
+            
+            if not placed and placed_count < 5:
+                #Try random positions
+                for _ in range(attempts_per_word):
+                    row = random.randint(0, self.grid_size - 1)
+                    col = random.randint(o, self.grid - 1)
+                    direction = random.choice(['across', 'down'])
+
+                    if self.can_place_word(word, row, col, direction):
+                        self.place_word(word, clue, row, col, direction)
+                        placed = True
+                        placed_count += 1
+                        break
+
+        self.fill_blocked_cells()
+
+        return placed_count >= 5 #Want at least 5 words for a puzzle
+    
+    def fill_blocked_cells(self):
+        #Fill the empty cells on the grid with blocked markers
+        for row in range(self.grid_size):
+            for col in range(self.grid_size):
+                if self.grid[row][col] == ' ':
+                    self.grid[row][col] = '#'
