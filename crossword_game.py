@@ -563,3 +563,25 @@ class CrosswordGame:
                         if col == word.col and word.row <= row < word.row + len(word.word):
                             self.selected_word = word
                             return
+                        
+    def handle_key_inputs(self, event):
+        if not self.selected_cell:
+            return
+        
+        row, col = self.selected_cell
+
+        if event.key == pygame.K_BACKSPACE:
+            self.user_grid[row][col] = ''
+        elif event.key == pygame.K_DELETE:
+            self.user_grid[row][col] = ''
+        elif event.unicode.isalpha():
+            self.user_grid[row][col] = event.unicode.upper()
+            self.move_selection(1, 0)
+        elif event.key == pygame.K_LEFT:
+            self.move_selection(0, -1)
+        elif event.key == pygame.K_RIGHT:
+            self.move_selection(0, 1)
+        elif event.key == pygame.K_UP:
+            self.move_selection(-1, 0)
+        elif event.key == pygame.K_DOWN:
+            self.move_selection(1, 0)
