@@ -585,3 +585,32 @@ class CrosswordGame:
             self.move_selection(-1, 0)
         elif event.key == pygame.K_DOWN:
             self.move_selection(1, 0)
+
+    def move_selection(self, row_delta, col_delta):
+        if not self.selected_cell:
+            return
+        
+        row, col = self.selected_cell
+        new_row = row + row_delta
+        new_col = col + col_delta
+
+        if self.selected_word:
+            if self.selected_word.direction == 'across' and col_delta != 0:
+                word_start_col = self.selected_word.col
+                word_end_col = self.selected_word.col + len(self.selected_word.word) - 1
+                if word_start_col <= new_col <= word_end_col:
+                    self.selected_cell = (new_row, new_col)
+                    return
+            elif self.selected_word.direction == 'down' and row_delta != 0:
+                word_start_row = self.selected_word.row
+                word_end_row = self.selected_word.row + len(self.selected_word.word) - 1
+                if word_start_row <= new_row <= word_end_row:
+                    self.selected_cell = (new_row, new_col)
+                    return
+                
+        while 0 <= new_row < GRID_SIZE and 0 <= new_col < GRID_SIZE:
+            if self.generator.grid[new_row][new_col] != '#':
+                self.selected_cell = (new_row, new_col)
+                return
+            new_row += row_delta
+            new_col += col_delta
