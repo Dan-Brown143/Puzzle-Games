@@ -272,7 +272,7 @@ class CrosswordGame:
     def __init__(self):
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Crossword Puzzle")
-        self.Clock = pygame.time.clock()
+        self.clock = pygame.time.Clock()
 
         #Theme
 
@@ -662,7 +662,7 @@ class CrosswordGame:
                 self.draw_complete_screen()
 
             pygame.display.flip()
-            self.Clock.tick(60)
+            self.clock.tick(60)
         
         pygame.quit()
         sys.exit()
