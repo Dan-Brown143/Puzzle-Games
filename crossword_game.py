@@ -83,7 +83,6 @@ class CrosswordGenerator:
         self.word_number = 1
         
     def can_place_word(self, word: str, row: int, col: int, direction: str) -> bool:
-        """Check if a word can be placed at the given position"""
         if direction == 'across':
             if col + len(word) > self.grid_size:
                 return False
@@ -133,7 +132,6 @@ class CrosswordGenerator:
         return True
     
     def place_word(self, word: str, clue: str, row: int, col: int, direction: str):
-        """Place a word on the grid"""
         number = self.word_number
         self.word_number += 1
         
@@ -147,7 +145,6 @@ class CrosswordGenerator:
         self.placed_words.append(CrosswordWord(word, clue, row, col, direction, number))
     
     def find_intersections(self, word: str) -> List[Tuple[int, int, str]]:
-        """Find possible positions where a word can intersect with existing words"""
         positions = []
         
         for placed_word in self.placed_words:
@@ -170,7 +167,6 @@ class CrosswordGenerator:
         return positions
     
     def generate(self, num_words: int = 15) -> bool:
-        """Generate a crossword puzzle - ALL WORDS MUST BE CONNECTED"""
         if not self.words_data or num_words == 0:
             return False
         
@@ -218,7 +214,6 @@ class CrosswordGenerator:
         return placed_count >= 6  # Minimum 6 words for a valid puzzle
     
     def fill_blocked_cells(self):
-        """Fill empty cells that aren't part of any word with blocked markers"""
         for row in range(self.grid_size):
             for col in range(self.grid_size):
                 if self.grid[row][col] == ' ':
@@ -329,7 +324,6 @@ class CrosswordGame:
         self.hint_button = None
     
     def load_words(self) -> List[Dict]:
-        """Load words from JSON file"""
         try:
             with open('crossword_words.json', 'r', encoding='utf-8') as f:
                 return json.load(f)
@@ -355,7 +349,6 @@ class CrosswordGame:
             ]
     
     def load_high_score(self) -> int:
-        """Load high score from file"""
         try:
             with open('highscore.txt', 'r') as f:
                 return int(f.read())
@@ -363,7 +356,6 @@ class CrosswordGame:
             return 0
     
     def save_high_score(self):
-        """Save high score to file"""
         try:
             with open('highscore.txt', 'w') as f:
                 f.write(str(self.high_score))
@@ -371,7 +363,6 @@ class CrosswordGame:
             print("Could not save high score")
     
     def create_menu_ui(self):
-        """Create menu UI elements"""
         self.category_checkboxes = []
         y_offset = 200
         for i, category in enumerate(self.categories):
@@ -382,12 +373,10 @@ class CrosswordGame:
         self.theme_button = Button(320, y_offset + len(self.categories) * 40 + 40, 200, 50, "Toggle Theme", self.toggle_theme)
     
     def toggle_theme(self):
-        """Toggle between light and dark mode"""
         self.dark_mode = not self.dark_mode
         self.colors = DARK_COLORS.copy() if self.dark_mode else LIGHT_COLORS.copy()
     
     def use_hint(self):
-        """Use a hint to reveal a random unfilled letter"""
         if self.hints_remaining <= 0:
             return
         
@@ -413,7 +402,6 @@ class CrosswordGame:
                     self.hint_button.enabled = False
     
     def start_game(self):
-        """Start a new game with selected categories"""
         print("Starting game...")
         
         # Get selected categories
@@ -460,7 +448,6 @@ class CrosswordGame:
         print("Could not generate valid puzzle after multiple attempts")
     
     def calculate_score(self):
-        """Calculate score for completed puzzle"""
         base_score = len(self.generator.placed_words) * POINTS_PER_WORD
         
         # Count letters (excluding hints)
@@ -477,12 +464,10 @@ class CrosswordGame:
         return base_score + letter_bonus + streak_bonus
     
     def next_puzzle(self):
-        """Move to the next puzzle"""
         self.streak += 1
         self.start_game()
     
     def draw_score_bar(self):
-        """Draw the score and streak information at the top"""
         font_large = pygame.font.Font(None, 36)
         font_medium = pygame.font.Font(None, 28)
         
@@ -504,7 +489,6 @@ class CrosswordGame:
             self.screen.blit(hints_text, (300, 60))
     
     def draw_menu(self):
-        """Draw the menu screen"""
         self.screen.fill(self.colors['background'])
         
         # Title
@@ -531,7 +515,6 @@ class CrosswordGame:
         self.theme_button.draw(self.screen, self.colors)
     
     def draw_grid(self):
-        """Draw the crossword grid"""
         for row in range(GRID_SIZE):
             for col in range(GRID_SIZE):
                 x = GRID_OFFSET_X + col * CELL_SIZE
@@ -587,7 +570,6 @@ class CrosswordGame:
                             self.screen.blit(number, (x + 2, y + 2))
     
     def draw_clues(self):
-        """Draw the clues panel"""
         clue_x = GRID_OFFSET_X + GRID_SIZE * CELL_SIZE + 50
         clue_y = GRID_OFFSET_Y + 50
         max_width = WINDOW_WIDTH - clue_x - 20
@@ -671,7 +653,6 @@ class CrosswordGame:
                 y += 5
     
     def draw_controls(self):
-        """Draw control instructions"""
         font = pygame.font.Font(None, 20)
         controls = [
             "Click cell to select",
@@ -688,7 +669,6 @@ class CrosswordGame:
             y += 22
     
     def check_completion(self):
-        """Check if the puzzle is complete"""
         for row in range(GRID_SIZE):
             for col in range(GRID_SIZE):
                 if self.generator.grid[row][col] != '#':
@@ -697,7 +677,6 @@ class CrosswordGame:
         return True
     
     def draw_complete_screen(self):
-        """Draw completion message"""
         overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         overlay.set_alpha(200)
         overlay.fill(self.colors['background'])
@@ -726,7 +705,6 @@ class CrosswordGame:
         self.screen.blit(subtitle, (WINDOW_WIDTH // 2 - subtitle.get_width() // 2, WINDOW_HEIGHT // 2 + 80))
     
     def handle_cell_click(self, pos):
-        """Handle clicking on a grid cell"""
         x, y = pos
         col = (x - GRID_OFFSET_X) // CELL_SIZE
         row = (y - GRID_OFFSET_Y) // CELL_SIZE
@@ -747,7 +725,6 @@ class CrosswordGame:
                             return
     
     def handle_key_input(self, event):
-        """Handle keyboard input"""
         if not self.selected_cell:
             return
         
@@ -762,20 +739,34 @@ class CrosswordGame:
                         self.move_selection(0, 1)
                     else:
                         self.move_selection(1, 0)
+            elif event.key == pygame.K_BACKSPACE:
+                # Move backward when backspacing on hint
+                if self.selected_word:
+                    if self.selected_word.direction == 'across':
+                        self.move_selection(0, -1)
+                    else:
+                        self.move_selection(-1, 0)
             return
         
         if event.key == pygame.K_BACKSPACE:
+            # Delete current cell
             self.user_grid[row][col] = ''
+            # Move backward in the word direction
+            if self.selected_word:
+                if self.selected_word.direction == 'across':
+                    self.move_selection(0, -1)
+                else:
+                    self.move_selection(-1, 0)
         elif event.key == pygame.K_DELETE:
             self.user_grid[row][col] = ''
         elif event.unicode.isalpha():
             self.user_grid[row][col] = event.unicode.upper()
-            # Auto-advance to next cell
+            # Auto-advance to next EMPTY cell (skip already filled cells and hints)
             if self.selected_word:
                 if self.selected_word.direction == 'across':
-                    self.move_selection(0, 1)
+                    self.move_to_next_empty_cell(0, 1)
                 else:
-                    self.move_selection(1, 0)
+                    self.move_to_next_empty_cell(1, 0)
         elif event.key == pygame.K_LEFT:
             self.move_selection(0, -1)
         elif event.key == pygame.K_RIGHT:
@@ -786,41 +777,41 @@ class CrosswordGame:
             self.move_selection(1, 0)
     
     def move_selection(self, row_delta, col_delta):
-        """Move the selected cell"""
-        if not self.selected_cell:
+        if not self.selected_cell or not self.selected_word:
             return
         
         row, col = self.selected_cell
         new_row = row + row_delta
         new_col = col + col_delta
         
-        # Stay within selected word if possible
-        if self.selected_word:
-            if self.selected_word.direction == 'across' and col_delta != 0:
-                word_start_col = self.selected_word.col
-                word_end_col = self.selected_word.col + len(self.selected_word.word) - 1
-                if word_start_col <= new_col <= word_end_col:
-                    self.selected_cell = (new_row, new_col)
-                    return
-            elif self.selected_word.direction == 'down' and row_delta != 0:
-                word_start_row = self.selected_word.row
-                word_end_row = self.selected_word.row + len(self.selected_word.word) - 1
-                if word_start_row <= new_row <= word_end_row:
-                    self.selected_cell = (new_row, new_col)
-                    return
-        
-        # Otherwise, find next valid cell
-        attempts = 0
-        while 0 <= new_row < GRID_SIZE and 0 <= new_col < GRID_SIZE and attempts < GRID_SIZE * 2:
-            if self.generator.grid[new_row][new_col] != '#':
-                self.selected_cell = (new_row, new_col)
-                return
-            new_row += row_delta
-            new_col += col_delta
-            attempts += 1
+        # Stay within the selected word boundaries
+        word = self.selected_word
+        if word.direction == 'across':
+            word_start_col = word.col
+            word_end_col = word.col + len(word.word) - 1
+            
+            # Move through cells in the word
+            while word_start_col <= new_col <= word_end_col:
+                if self.generator.grid[new_row][new_col] != '#':
+                    # Check if this cell is empty (not filled and not a hint)
+                    if (new_row, new_col) not in self.hint_cells and self.user_grid[new_row][new_col] == '':
+                        self.selected_cell = (new_row, new_col)
+                        return
+                new_col += col_delta
+        else:  # down
+            word_start_row = word.row
+            word_end_row = word.row + len(word.word) - 1
+            
+            # Move through cells in the word
+            while word_start_row <= new_row <= word_end_row:
+                if self.generator.grid[new_row][new_col] != '#':
+                    # Check if this cell is empty (not filled and not a hint)
+                    if (new_row, new_col) not in self.hint_cells and self.user_grid[new_row][new_col] == '':
+                        self.selected_cell = (new_row, new_col)
+                        return
+                new_row += row_delta
     
     def run(self):
-        """Main game loop"""
         running = True
         
         while running:
