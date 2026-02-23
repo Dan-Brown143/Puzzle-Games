@@ -614,3 +614,56 @@ class CrosswordGame:
                 return
             new_row += row_delta
             new_col += col_delta
+
+    def run(self):
+        running = True
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        if self.state == 'playing' or self.state == 'complete':
+                            self.state = 'menu'
+                            self.create_menu_ui()
+                    elif event.key == pygame.K_SPACE and self.state == 'complete':
+                        self.start_game()
+                    elif self.state == 'playing':
+                        self.handle_key_inputs(event)
+
+                elif self.state == 'menu':
+                    for checkbox in self.category_checkboxes:
+                        checkbox.handle_event(event)
+                    self.start_button.handle_event(event)
+                    self.theme_button.handle_event(event)
+
+                elif self.state == 'playing':
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        self.handle_cell_click(event.pos)
+
+            self.screen.fill(self.colours['background'])
+
+            if self.state == 'menu':
+                self.draw_menu()
+
+            elif self.state == 'playing':
+                self.draw_grid
+                self.draw_clues
+                self.draw_controls
+
+                if self.check_completion():
+                    self.state = 'complete'
+
+            elif self.state == 'complete':
+                self.draw_grid()
+                self.draw_clues()
+                self.draw_complete_screen()
+
+            pygame.display.flip()
+            self.clock.tick(60)
+        
+        pygame.quit()
+        sys.exit()
+
