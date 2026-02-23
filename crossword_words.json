@@ -1,0 +1,452 @@
+[
+  {
+    "word": "python",
+    "clue": "Popular programming language named after a comedy group",
+    "category": "Technology"
+  },
+  {
+    "word": "javascript",
+    "clue": "Web programming language that runs in browsers",
+    "category": "Technology"
+  },
+  {
+    "word": "algorithm",
+    "clue": "Step-by-step procedure for solving a problem",
+    "category": "Technology"
+  },
+  {
+    "word": "database",
+    "clue": "Organized collection of data",
+    "category": "Technology"
+  },
+  {
+    "word": "network",
+    "clue": "System of interconnected computers",
+    "category": "Technology"
+  },
+  {
+    "word": "software",
+    "clue": "Programs and operating systems used by computers",
+    "category": "Technology"
+  },
+  {
+    "word": "internet",
+    "clue": "Global system of interconnected computer networks",
+    "category": "Technology"
+  },
+  {
+    "word": "binary",
+    "clue": "Number system using only 0 and 1",
+    "category": "Technology"
+  },
+  {
+    "word": "debugging",
+    "clue": "Process of finding and fixing errors in code",
+    "category": "Technology"
+  },
+  {
+    "word": "compiler",
+    "clue": "Translates source code into machine code",
+    "category": "Technology"
+  },
+  {
+    "word": "soccer",
+    "clue": "Sport where you can't use your hands (except goalkeeper)",
+    "category": "Sports"
+  },
+  {
+    "word": "basketball",
+    "clue": "Sport with a hoop and orange ball",
+    "category": "Sports"
+  },
+  {
+    "word": "tennis",
+    "clue": "Racket sport played on a court with a net",
+    "category": "Sports"
+  },
+  {
+    "word": "swimming",
+    "clue": "Aquatic sport and exercise",
+    "category": "Sports"
+  },
+  {
+    "word": "marathon",
+    "clue": "Long-distance running race of 26.2 miles",
+    "category": "Sports"
+  },
+  {
+    "word": "cricket",
+    "clue": "Bat-and-ball game popular in England and India",
+    "category": "Sports"
+  },
+  {
+    "word": "baseball",
+    "clue": "American sport with bases and a diamond field",
+    "category": "Sports"
+  },
+  {
+    "word": "volleyball",
+    "clue": "Sport played by hitting a ball over a net",
+    "category": "Sports"
+  },
+  {
+    "word": "hockey",
+    "clue": "Sport played on ice with sticks and a puck",
+    "category": "Sports"
+  },
+  {
+    "word": "golf",
+    "clue": "Sport where you hit a ball into holes with clubs",
+    "category": "Sports"
+  },
+  {
+    "word": "guitar",
+    "clue": "Six-stringed musical instrument",
+    "category": "Music"
+  },
+  {
+    "word": "piano",
+    "clue": "Keyboard instrument with black and white keys",
+    "category": "Music"
+  },
+  {
+    "word": "violin",
+    "clue": "Stringed instrument played with a bow",
+    "category": "Music"
+  },
+  {
+    "word": "drums",
+    "clue": "Percussion instruments played with sticks",
+    "category": "Music"
+  },
+  {
+    "word": "symphony",
+    "clue": "Large-scale orchestral composition",
+    "category": "Music"
+  },
+  {
+    "word": "melody",
+    "clue": "Sequence of musical notes forming a tune",
+    "category": "Music"
+  },
+  {
+    "word": "harmony",
+    "clue": "Combination of notes played simultaneously",
+    "category": "Music"
+  },
+  {
+    "word": "rhythm",
+    "clue": "Pattern of beats in music",
+    "category": "Music"
+  },
+  {
+    "word": "concert",
+    "clue": "Live musical performance",
+    "category": "Music"
+  },
+  {
+    "word": "orchestra",
+    "clue": "Large group of musicians playing together",
+    "category": "Music"
+  },
+  {
+    "word": "elephant",
+    "clue": "Largest land animal with a trunk",
+    "category": "Animals"
+  },
+  {
+    "word": "dolphin",
+    "clue": "Intelligent marine mammal",
+    "category": "Animals"
+  },
+  {
+    "word": "penguin",
+    "clue": "Flightless bird that lives in Antarctica",
+    "category": "Animals"
+  },
+  {
+    "word": "giraffe",
+    "clue": "Tallest animal with a long neck",
+    "category": "Animals"
+  },
+  {
+    "word": "kangaroo",
+    "clue": "Australian marsupial that hops",
+    "category": "Animals"
+  },
+  {
+    "word": "butterfly",
+    "clue": "Insect with colorful wings",
+    "category": "Animals"
+  },
+  {
+    "word": "cheetah",
+    "clue": "Fastest land animal",
+    "category": "Animals"
+  },
+  {
+    "word": "octopus",
+    "clue": "Eight-armed sea creature",
+    "category": "Animals"
+  },
+  {
+    "word": "gorilla",
+    "clue": "Largest primate species",
+    "category": "Animals"
+  },
+  {
+    "word": "leopard",
+    "clue": "Spotted big cat",
+    "category": "Animals"
+  },
+  {
+    "word": "mountain",
+    "clue": "Large natural elevation of land",
+    "category": "Geography"
+  },
+  {
+    "word": "ocean",
+    "clue": "Vast body of salt water",
+    "category": "Geography"
+  },
+  {
+    "word": "desert",
+    "clue": "Dry, sandy region with little rainfall",
+    "category": "Geography"
+  },
+  {
+    "word": "volcano",
+    "clue": "Mountain that erupts with lava",
+    "category": "Geography"
+  },
+  {
+    "word": "island",
+    "clue": "Land surrounded by water",
+    "category": "Geography"
+  },
+  {
+    "word": "river",
+    "clue": "Natural flowing watercourse",
+    "category": "Geography"
+  },
+  {
+    "word": "canyon",
+    "clue": "Deep gorge with steep sides",
+    "category": "Geography"
+  },
+  {
+    "word": "glacier",
+    "clue": "Slow-moving mass of ice",
+    "category": "Geography"
+  },
+  {
+    "word": "forest",
+    "clue": "Large area covered with trees",
+    "category": "Geography"
+  },
+  {
+    "word": "continent",
+    "clue": "Large continuous mass of land",
+    "category": "Geography"
+  },
+  {
+    "word": "novel",
+    "clue": "Long fictional narrative book",
+    "category": "Literature"
+  },
+  {
+    "word": "poetry",
+    "clue": "Literary work in verse",
+    "category": "Literature"
+  },
+  {
+    "word": "chapter",
+    "clue": "Division of a book",
+    "category": "Literature"
+  },
+  {
+    "word": "author",
+    "clue": "Person who writes books",
+    "category": "Literature"
+  },
+  {
+    "word": "metaphor",
+    "clue": "Figure of speech comparing two things",
+    "category": "Literature"
+  },
+  {
+    "word": "character",
+    "clue": "Person in a story or play",
+    "category": "Literature"
+  },
+  {
+    "word": "plot",
+    "clue": "Sequence of events in a story",
+    "category": "Literature"
+  },
+  {
+    "word": "tragedy",
+    "clue": "Dramatic work with a sad ending",
+    "category": "Literature"
+  },
+  {
+    "word": "comedy",
+    "clue": "Humorous dramatic work",
+    "category": "Literature"
+  },
+  {
+    "word": "fiction",
+    "clue": "Literature created from imagination",
+    "category": "Literature"
+  },
+  {
+    "word": "oxygen",
+    "clue": "Gas essential for breathing",
+    "category": "Science"
+  },
+  {
+    "word": "gravity",
+    "clue": "Force that pulls objects toward Earth",
+    "category": "Science"
+  },
+  {
+    "word": "atom",
+    "clue": "Smallest unit of matter",
+    "category": "Science"
+  },
+  {
+    "word": "molecule",
+    "clue": "Group of atoms bonded together",
+    "category": "Science"
+  },
+  {
+    "word": "energy",
+    "clue": "Capacity to do work",
+    "category": "Science"
+  },
+  {
+    "word": "fossil",
+    "clue": "Preserved remains of ancient life",
+    "category": "Science"
+  },
+  {
+    "word": "photosynthesis",
+    "clue": "Process plants use to make food from sunlight",
+    "category": "Science"
+  },
+  {
+    "word": "evolution",
+    "clue": "Process of gradual change in species",
+    "category": "Science"
+  },
+  {
+    "word": "climate",
+    "clue": "Average weather conditions over time",
+    "category": "Science"
+  },
+  {
+    "word": "electricity",
+    "clue": "Flow of electric charge",
+    "category": "Science"
+  },
+  {
+    "word": "painting",
+    "clue": "Art created with colors on canvas",
+    "category": "Art"
+  },
+  {
+    "word": "sculpture",
+    "clue": "Three-dimensional artwork",
+    "category": "Art"
+  },
+  {
+    "word": "portrait",
+    "clue": "Painting or drawing of a person",
+    "category": "Art"
+  },
+  {
+    "word": "museum",
+    "clue": "Building displaying art and artifacts",
+    "category": "Art"
+  },
+  {
+    "word": "gallery",
+    "clue": "Room or building for displaying art",
+    "category": "Art"
+  },
+  {
+    "word": "canvas",
+    "clue": "Cloth surface for painting",
+    "category": "Art"
+  },
+  {
+    "word": "abstract",
+    "clue": "Art style not representing reality",
+    "category": "Art"
+  },
+  {
+    "word": "mosaic",
+    "clue": "Art made from small colored pieces",
+    "category": "Art"
+  },
+  {
+    "word": "sketch",
+    "clue": "Quick, rough drawing",
+    "category": "Art"
+  },
+  {
+    "word": "mural",
+    "clue": "Large painting on a wall",
+    "category": "Art"
+  },
+  {
+    "word": "history",
+    "clue": "Study of past events",
+    "category": "Education"
+  },
+  {
+    "word": "mathematics",
+    "clue": "Study of numbers and equations",
+    "category": "Education"
+  },
+  {
+    "word": "biology",
+    "clue": "Study of living organisms",
+    "category": "Education"
+  },
+  {
+    "word": "chemistry",
+    "clue": "Study of substances and reactions",
+    "category": "Education"
+  },
+  {
+    "word": "physics",
+    "clue": "Study of matter and energy",
+    "category": "Education"
+  },
+  {
+    "word": "geography",
+    "clue": "Study of Earth's features",
+    "category": "Education"
+  },
+  {
+    "word": "language",
+    "clue": "System of communication",
+    "category": "Education"
+  },
+  {
+    "word": "calculator",
+    "clue": "Device for performing mathematical operations",
+    "category": "Education"
+  },
+  {
+    "word": "library",
+    "clue": "Building containing books",
+    "category": "Education"
+  },
+  {
+    "word": "university",
+    "clue": "Institution of higher learning",
+    "category": "Education"
+  }
+]
