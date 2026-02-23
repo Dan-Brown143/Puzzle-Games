@@ -423,3 +423,125 @@ class CrosswordGame:
                         font_small = pygame.font.Font(None, 18)
                         number = font_small.render(str(word.number), True, self.colours['number_text'])
                         self.screen.blit(number, (x + 2, y + 2))
+
+    def draw_clues(self):
+        clue_x = GRID_OFFSET_X + GRID_SIZE * CELL_SIZE + 40
+        clue_y = GRID_OFFSET_Y
+
+        font_title = pygame.font.Font(None, 32)
+        font_clue = pygame.font.Font(None, 22)
+
+        #Separate the across clues from the down clues
+        across_words = [w for w in self.generator.placed_words if w.direction == 'across']
+        down_words = [w for w in self.generator.placed_words if w.direction == 'down']
+
+        across_words.sort(key=lambda w: w.number)
+        down_words.sort(key=lambda w: w.number)
+
+        #Draw the across clues
+        title = font_title.render("Across", True, self.colours['text'])
+        self.screen.blit(title, (clue_x, clue_y))
+        y = clue_y + 40
+
+        for word in across_words:
+            if y > WINDOW_HEIGHT - 40:
+                break
+            clue_colour = self.colours['button'] if self.selected_word == word else self.colours['text']
+            clue_text = f"{word.number}. {word.clue}"
+
+            max_width = WINDOW_WIDTH - clue_x - 20
+            words_in_clue = clue_text.split()
+            lines = []
+            current_line = []
+
+            for word_str in words_in_clue:
+                test_line = ' '.join(current_line + [word_str])
+                if font_clue.size(test_line)[0] <= max_width:
+                    current_line.append(word_str)
+                else:
+                    if current_line:
+                        lines.append(' '.join(current_line))
+                    current_line = [word_str]
+            if current_line:
+                lines.append(' '.join(current_line))
+
+            for line in lines:
+                text = font_clue.render(line, True, clue_colour)
+                self.screen.blit(text, (clue_x, y))
+                y += 25
+            y += 5
+
+        #Draw the down clues
+        y += 20
+        if y < WINDOW_HEIGHT - 40:
+            title = font_title.render("Down", True, self.colours['text'])
+            self.screen.blit(title, (clue_x, y))
+            y += 40
+
+            for word in down_words:
+                if y > WINDOW_HEIGHT - 40:
+                    break
+                clue_colour = self.colours['button'] if self.selected_word == word else self.colours['text']
+                clue_text = f"{word.number}. {word.clue}"
+
+                max_width = WINDOW_WIDTH - clue_x - 20
+                words_in_clue = clue_text.split()
+                lines = []
+                current_line = []
+
+                for word_str in words_in_clue:
+                    test_line = ' '.join(current_line + [word_str])
+                    if font_clue.size(test_line)[0] <= max_width:
+                        current_line.append(word_str)
+                    else:
+                        if current_line:
+                            lines.append(' '.join(current_line))
+                        current_line = [word_str]
+                if current_line:
+                    lines.append(' '.join(current_line))
+
+                for line in lines:
+                    text = font_clue.render(line, True, clue_colour)
+                    self.screen.blit(text, (clue_x, y))
+                    y += 25
+                y += 5
+
+    def draw_controls(self):
+        font = pygame.font.Font(None, 24)
+        controls = [
+            "Click a cell to select",
+            "Type a letter to fill",
+            "Backspace to delete",
+            "Arrow keys to navigate",
+            "ESC for the menu"
+        ]
+
+        y = GRID_OFFSET_Y + GRID_SIZE * CELL_SIZE + 20
+        for control in controls:
+            text = font.render(control, True, self.colours['text'])
+            self.screen.blit(text, (GRID_OFFSET_X, y))
+            y += 30
+
+    def check_completion(self):
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                if self.generator.grid[row][col] != '#':
+                    if self.user_grid[row][col] != self.generator.grid[row][col]:
+                        return False
+        return True
+    
+    def draw_complete_screen(self):
+        overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        overlay.set_alpha(200)
+        overlay.fill(self.colours['background'])
+        self.screen.blit(overlay, (0, 0))
+
+        font_title = pygame.font.Font(None, 72)
+        font_sub = pygame.font.Font(None, 36)
+
+        title = font_title.render("Congratulations", True, self.colours['text'])
+        subtitle = font_sub.render("Press ESC for the menu or SPACE for a new game", True, self.colours['text'])
+
+        self.screen.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, WINDOW_HEIGHT // 2 - 50))
+        self.screen.blit(subtitle, (WINDOW_WIDTH // 2 - subtitle.get_width() // 2, WINDOW_HEIGHT // 2 + 20))
+        
