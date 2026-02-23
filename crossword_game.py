@@ -755,26 +755,40 @@ class CrosswordGame:
         
         row, col = self.selected_cell
         
-        # Don't allow editing hint cells
+        # Handle arrow keys FIRST (before hint cell check)
+        if event.key == pygame.K_LEFT:
+            self.move_selection(0, -1)
+            return
+        elif event.key == pygame.K_RIGHT:
+            self.move_selection(0, 1)
+            return
+        elif event.key == pygame.K_UP:
+            self.move_selection(-1, 0)
+            return
+        elif event.key == pygame.K_DOWN:
+            self.move_selection(1, 0)
+            return
+        
+        # Don't allow editing hint cells (but backspace moves back)
         if (row, col) in self.hint_cells:
-            if event.unicode.isalpha():
-                # Move to next cell if trying to type on hint
-                if self.selected_word:
-                    if self.selected_word.direction == 'across':
-                        self.move_selection(0, 1)
-                    else:
-                        self.move_selection(1, 0)
-            elif event.key == pygame.K_BACKSPACE:
+            if event.key == pygame.K_BACKSPACE:
                 # Move backward when backspacing on hint
                 if self.selected_word:
                     if self.selected_word.direction == 'across':
                         self.move_selection(0, -1)
                     else:
                         self.move_selection(-1, 0)
+            elif event.unicode.isalpha():
+                # Move to next cell if trying to type on hint
+                if self.selected_word:
+                    if self.selected_word.direction == 'across':
+                        self.move_to_next_empty_cell(0, 1)
+                    else:
+                        self.move_to_next_empty_cell(1, 0)
             return
         
+        # Handle backspace - delete and move back
         if event.key == pygame.K_BACKSPACE:
-            # Delete current cell
             self.user_grid[row][col] = ''
             # Move backward in the word direction
             if self.selected_word:
@@ -792,16 +806,8 @@ class CrosswordGame:
                     self.move_to_next_empty_cell(0, 1)
                 else:
                     self.move_to_next_empty_cell(1, 0)
-        elif event.key == pygame.K_LEFT:
-            self.move_selection(0, -1)
-        elif event.key == pygame.K_RIGHT:
-            self.move_selection(0, 1)
-        elif event.key == pygame.K_UP:
-            self.move_selection(-1, 0)
-        elif event.key == pygame.K_DOWN:
-            self.move_selection(1, 0)
     
-    def move_selection(self, row_delta, col_delta):
+    def move_to_next_empty_cell(self, row_delta, col_delta):
         if not self.selected_cell or not self.selected_word:
             return
         
