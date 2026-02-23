@@ -544,4 +544,22 @@ class CrosswordGame:
 
         self.screen.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, WINDOW_HEIGHT // 2 - 50))
         self.screen.blit(subtitle, (WINDOW_WIDTH // 2 - subtitle.get_width() // 2, WINDOW_HEIGHT // 2 + 20))
-        
+
+    def handle_cell_click(self, pos):
+        x, y = pos
+        col = (x - GRID_OFFSET_X) // CELL_SIZE
+        row = (y - GRID_OFFSET_Y) // CELL_SIZE
+
+        if 0 <= row < GRID_SIZE and 0 <= col < GRID_SIZE:
+            if self.generator.grid[row][col] != '#':
+                self.selected_cell = (row, col)
+
+                for word in self.generator.placed_words:
+                    if word.direction == 'across':
+                        if row == word.row and word.col <= col < word.col + len(word.word):
+                            self.selected_word = word
+                            return
+                    else:
+                        if col == word.col and word.row <= row < word.row + len(word.word):
+                            self.selected_word = word
+                            return
