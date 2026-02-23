@@ -19,7 +19,9 @@ WINDOW_HEIGHT = 900
 CELL_SIZE = 35
 GRID_SIZE = 15
 GRID_OFFSET_X = 50
-GRID_OFFSET_Y = 100
+GRID_OFFSET_Y = 150
+POINTS_PER_WORD = 100
+POINTS_PER_LETTER = 10
 
 # Colors - Light Mode
 LIGHT_COLORS = {
@@ -32,10 +34,13 @@ LIGHT_COLORS = {
     'cell_selected': (100, 150, 255),
     'cell_correct': (144, 238, 144),
     'cell_incorrect': (255, 160, 160),
+    'cell_hint': (255, 223, 128),
     'number_text': (100, 100, 100),
     'button': (70, 130, 180),
     'button_hover': (100, 160, 210),
+    'button_disabled': (150, 150, 150),
     'button_text': (255, 255, 255),
+    'score_text': (0, 100, 0),
 }
 
 # Colors - Dark Mode
@@ -49,10 +54,13 @@ DARK_COLORS = {
     'cell_selected': (80, 120, 200),
     'cell_correct': (60, 140, 60),
     'cell_incorrect': (180, 60, 60),
+    'cell_hint': (180, 140, 50),
     'number_text': (150, 150, 150),
     'button': (60, 100, 150),
     'button_hover': (80, 120, 170),
+    'button_disabled': (80, 80, 90),
     'button_text': (240, 240, 240),
+    'score_text': (100, 200, 100),
 }
 
 
@@ -162,7 +170,7 @@ class CrosswordGenerator:
         return positions
     
     def generate(self, num_words: int = 15) -> bool:
-        """Generate a crossword puzzle"""
+        """Generate a crossword puzzle - ALL WORDS MUST BE CONNECTED"""
         if not self.words_data or num_words == 0:
             return False
         
@@ -180,16 +188,16 @@ class CrosswordGenerator:
         
         self.place_word(first_word, first_word_data['clue'], start_row, start_col, 'across')
         
-        # Try to place remaining words
+        # Try to place remaining words - ONLY THROUGH INTERSECTIONS
         placed_count = 1
-        attempts_per_word = 150
+        attempts_per_word = 200
         
         for word_data in selected[1:]:
             word = word_data['word'].upper()
             clue = word_data['clue']
             placed = False
             
-            # Try intersections first
+            # ONLY try intersections - no random placement
             positions = self.find_intersections(word)
             random.shuffle(positions)
             
@@ -200,23 +208,14 @@ class CrosswordGenerator:
                     placed_count += 1
                     break
             
-            if not placed and placed_count < 8:
-                # Try random positions for early words
-                for _ in range(attempts_per_word):
-                    row = random.randint(0, self.grid_size - 1)
-                    col = random.randint(0, self.grid_size - 1)
-                    direction = random.choice(['across', 'down'])
-                    
-                    if self.can_place_word(word, row, col, direction):
-                        self.place_word(word, clue, row, col, direction)
-                        placed = True
-                        placed_count += 1
-                        break
+            # If we can't place it, skip this word (don't place randomly)
+            if not placed:
+                print(f"Skipped word '{word}' - no valid intersections")
         
         # Fill empty cells with blocked cells
         self.fill_blocked_cells()
         
-        return placed_count >= 5  # Minimum 5 words for a valid puzzle
+        return placed_count >= 6  # Minimum 6 words for a valid puzzle
     
     def fill_blocked_cells(self):
         """Fill empty cells that aren't part of any word with blocked markers"""
@@ -232,9 +231,14 @@ class Button:
         self.text = text
         self.action = action
         self.hovered = False
+        self.enabled = True
     
     def draw(self, screen, colors):
-        color = colors['button_hover'] if self.hovered else colors['button']
+        if not self.enabled:
+            color = colors['button_disabled']
+        else:
+            color = colors['button_hover'] if self.hovered else colors['button']
+        
         pygame.draw.rect(screen, color, self.rect, border_radius=5)
         pygame.draw.rect(screen, colors['text'], self.rect, 2, border_radius=5)
         
@@ -244,6 +248,9 @@ class Button:
         screen.blit(text_surface, text_rect)
     
     def handle_event(self, event):
+        if not self.enabled:
+            return False
+            
         if event.type == pygame.MOUSEMOTION:
             self.hovered = self.rect.collidepoint(event.pos)
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -303,15 +310,23 @@ class CrosswordGame:
         self.all_words = self.load_words()
         self.categories = sorted(list(set(word['category'] for word in self.all_words)))
         
+        # Score system
+        self.current_score = 0
+        self.high_score = self.load_high_score()
+        self.streak = 0
+        
         # Game state
         self.state = 'menu'  # 'menu', 'playing', 'complete'
         self.generator = None
         self.user_grid = None
         self.selected_cell = None
         self.selected_word = None
+        self.hints_remaining = 3
+        self.hint_cells = []  # Track which cells were filled by hints
         
         # UI Elements
         self.create_menu_ui()
+        self.hint_button = None
     
     def load_words(self) -> List[Dict]:
         """Load words from JSON file"""
@@ -339,6 +354,22 @@ class CrosswordGame:
                 {"word": "forest", "clue": "Large area covered with trees", "category": "Nature"},
             ]
     
+    def load_high_score(self) -> int:
+        """Load high score from file"""
+        try:
+            with open('highscore.txt', 'r') as f:
+                return int(f.read())
+        except:
+            return 0
+    
+    def save_high_score(self):
+        """Save high score to file"""
+        try:
+            with open('highscore.txt', 'w') as f:
+                f.write(str(self.high_score))
+        except:
+            print("Could not save high score")
+    
     def create_menu_ui(self):
         """Create menu UI elements"""
         self.category_checkboxes = []
@@ -354,6 +385,32 @@ class CrosswordGame:
         """Toggle between light and dark mode"""
         self.dark_mode = not self.dark_mode
         self.colors = DARK_COLORS.copy() if self.dark_mode else LIGHT_COLORS.copy()
+    
+    def use_hint(self):
+        """Use a hint to reveal a random unfilled letter"""
+        if self.hints_remaining <= 0:
+            return
+        
+        # Find all empty cells that need to be filled
+        empty_cells = []
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                if self.generator.grid[row][col] != '#':
+                    if self.user_grid[row][col] == '':
+                        empty_cells.append((row, col))
+        
+        if empty_cells:
+            # Pick a random empty cell
+            row, col = random.choice(empty_cells)
+            self.user_grid[row][col] = self.generator.grid[row][col]
+            self.hint_cells.append((row, col))
+            self.hints_remaining -= 1
+            
+            # Update hint button
+            if self.hint_button:
+                self.hint_button.text = f"Hint ({self.hints_remaining})"
+                if self.hints_remaining == 0:
+                    self.hint_button.enabled = False
     
     def start_game(self):
         """Start a new game with selected categories"""
@@ -375,7 +432,7 @@ class CrosswordGame:
         print(f"Available words: {len(available_words)}")
         
         # Generate puzzle - try multiple times if needed
-        max_attempts = 5
+        max_attempts = 10
         for attempt in range(max_attempts):
             self.generator = CrosswordGenerator(available_words, GRID_SIZE)
             success = self.generator.generate(num_words=12)
@@ -389,12 +446,62 @@ class CrosswordGame:
                                   for c in range(GRID_SIZE)] for r in range(GRID_SIZE)]
                 self.selected_cell = None
                 self.selected_word = None
+                self.hints_remaining = 3
+                self.hint_cells = []
+                
+                # Create hint button
+                self.hint_button = Button(GRID_OFFSET_X + GRID_SIZE * CELL_SIZE + 50, 50, 150, 40, f"Hint ({self.hints_remaining})", self.use_hint)
+                
                 self.state = 'playing'
                 return
             else:
                 print(f"Failed attempt {attempt + 1}")
         
         print("Could not generate valid puzzle after multiple attempts")
+    
+    def calculate_score(self):
+        """Calculate score for completed puzzle"""
+        base_score = len(self.generator.placed_words) * POINTS_PER_WORD
+        
+        # Count letters (excluding hints)
+        letter_count = 0
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                if self.generator.grid[row][col] != '#':
+                    if (row, col) not in self.hint_cells:
+                        letter_count += 1
+        
+        letter_bonus = letter_count * POINTS_PER_LETTER
+        streak_bonus = self.streak * 50
+        
+        return base_score + letter_bonus + streak_bonus
+    
+    def next_puzzle(self):
+        """Move to the next puzzle"""
+        self.streak += 1
+        self.start_game()
+    
+    def draw_score_bar(self):
+        """Draw the score and streak information at the top"""
+        font_large = pygame.font.Font(None, 36)
+        font_medium = pygame.font.Font(None, 28)
+        
+        # Current Score
+        score_text = font_large.render(f"Score: {self.current_score}", True, self.colors['score_text'])
+        self.screen.blit(score_text, (50, 20))
+        
+        # High Score
+        high_score_text = font_medium.render(f"High Score: {self.high_score}", True, self.colors['text'])
+        self.screen.blit(high_score_text, (50, 60))
+        
+        # Streak
+        streak_text = font_large.render(f"Streak: {self.streak}", True, self.colors['button'])
+        self.screen.blit(streak_text, (300, 20))
+        
+        # Hints remaining
+        if self.state == 'playing':
+            hints_text = font_medium.render(f"Hints: {self.hints_remaining}", True, self.colors['text'])
+            self.screen.blit(hints_text, (300, 60))
     
     def draw_menu(self):
         """Draw the menu screen"""
@@ -404,6 +511,11 @@ class CrosswordGame:
         font_title = pygame.font.Font(None, 64)
         title = font_title.render("Crossword Puzzle", True, self.colors['text'])
         self.screen.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, 50))
+        
+        # High Score Display
+        font_score = pygame.font.Font(None, 36)
+        hs_text = font_score.render(f"High Score: {self.high_score}", True, self.colors['score_text'])
+        self.screen.blit(hs_text, (WINDOW_WIDTH // 2 - hs_text.get_width() // 2, 120))
         
         # Instructions
         font_small = pygame.font.Font(None, 28)
@@ -434,8 +546,11 @@ class CrosswordGame:
                     # Empty cell
                     color = self.colors['grid_bg']
                     
+                    # Highlight hint cells
+                    if (row, col) in self.hint_cells:
+                        color = self.colors['cell_hint']
                     # Highlight selected cell
-                    if self.selected_cell and self.selected_cell == (row, col):
+                    elif self.selected_cell and self.selected_cell == (row, col):
                         color = self.colors['cell_selected']
                     # Highlight cells in selected word
                     elif self.selected_word:
@@ -474,7 +589,7 @@ class CrosswordGame:
     def draw_clues(self):
         """Draw the clues panel"""
         clue_x = GRID_OFFSET_X + GRID_SIZE * CELL_SIZE + 50
-        clue_y = GRID_OFFSET_Y
+        clue_y = GRID_OFFSET_Y + 50
         max_width = WINDOW_WIDTH - clue_x - 20
         
         font_title = pygame.font.Font(None, 32)
@@ -557,12 +672,12 @@ class CrosswordGame:
     
     def draw_controls(self):
         """Draw control instructions"""
-        font = pygame.font.Font(None, 22)
+        font = pygame.font.Font(None, 20)
         controls = [
-            "Click a cell to select",
+            "Click cell to select",
             "Type letters to fill",
             "Backspace to delete",
-            "Arrow keys to navigate",
+            "Arrow keys to move",
             "ESC for menu"
         ]
         
@@ -570,7 +685,7 @@ class CrosswordGame:
         for control in controls:
             text = font.render(control, True, self.colors['text'])
             self.screen.blit(text, (GRID_OFFSET_X, y))
-            y += 25
+            y += 22
     
     def check_completion(self):
         """Check if the puzzle is complete"""
@@ -590,12 +705,25 @@ class CrosswordGame:
         
         font_title = pygame.font.Font(None, 72)
         font_sub = pygame.font.Font(None, 36)
+        font_small = pygame.font.Font(None, 28)
         
-        title = font_title.render("Congratulations!", True, self.colors['text'])
-        subtitle = font_sub.render("Press ESC for menu or SPACE for new game", True, self.colors['text'])
+        # Calculate and award score
+        puzzle_score = self.calculate_score()
+        self.current_score += puzzle_score
         
-        self.screen.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, WINDOW_HEIGHT // 2 - 50))
-        self.screen.blit(subtitle, (WINDOW_WIDTH // 2 - subtitle.get_width() // 2, WINDOW_HEIGHT // 2 + 20))
+        if self.current_score > self.high_score:
+            self.high_score = self.current_score
+            self.save_high_score()
+        
+        title = font_title.render("Puzzle Complete!", True, self.colors['text'])
+        score_text = font_sub.render(f"Points Earned: {puzzle_score}", True, self.colors['score_text'])
+        total_text = font_sub.render(f"Total Score: {self.current_score}", True, self.colors['score_text'])
+        subtitle = font_small.render("Press SPACE for next puzzle or ESC for menu", True, self.colors['text'])
+        
+        self.screen.blit(title, (WINDOW_WIDTH // 2 - title.get_width() // 2, WINDOW_HEIGHT // 2 - 100))
+        self.screen.blit(score_text, (WINDOW_WIDTH // 2 - score_text.get_width() // 2, WINDOW_HEIGHT // 2 - 20))
+        self.screen.blit(total_text, (WINDOW_WIDTH // 2 - total_text.get_width() // 2, WINDOW_HEIGHT // 2 + 30))
+        self.screen.blit(subtitle, (WINDOW_WIDTH // 2 - subtitle.get_width() // 2, WINDOW_HEIGHT // 2 + 80))
     
     def handle_cell_click(self, pos):
         """Handle clicking on a grid cell"""
@@ -624,6 +752,17 @@ class CrosswordGame:
             return
         
         row, col = self.selected_cell
+        
+        # Don't allow editing hint cells
+        if (row, col) in self.hint_cells:
+            if event.unicode.isalpha():
+                # Move to next cell if trying to type on hint
+                if self.selected_word:
+                    if self.selected_word.direction == 'across':
+                        self.move_selection(0, 1)
+                    else:
+                        self.move_selection(1, 0)
+            return
         
         if event.key == pygame.K_BACKSPACE:
             self.user_grid[row][col] = ''
@@ -693,9 +832,11 @@ class CrosswordGame:
                     if event.key == pygame.K_ESCAPE:
                         if self.state == 'playing' or self.state == 'complete':
                             self.state = 'menu'
+                            self.current_score = 0
+                            self.streak = 0
                             self.create_menu_ui()
                     elif event.key == pygame.K_SPACE and self.state == 'complete':
-                        self.start_game()
+                        self.next_puzzle()
                     elif self.state == 'playing':
                         self.handle_key_input(event)
                 
@@ -705,6 +846,8 @@ class CrosswordGame:
                             checkbox.handle_event(event)
                         self.start_button.handle_event(event)
                         self.theme_button.handle_event(event)
+                    elif self.state == 'playing' and self.hint_button:
+                        self.hint_button.handle_event(event)
                 
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if self.state == 'menu':
@@ -713,6 +856,8 @@ class CrosswordGame:
                         self.start_button.handle_event(event)
                         self.theme_button.handle_event(event)
                     elif self.state == 'playing':
+                        if self.hint_button:
+                            self.hint_button.handle_event(event)
                         self.handle_cell_click(event.pos)
             
             # Drawing
@@ -722,6 +867,9 @@ class CrosswordGame:
                 self.draw_menu()
             
             elif self.state == 'playing':
+                self.draw_score_bar()
+                if self.hint_button:
+                    self.hint_button.draw(self.screen, self.colors)
                 self.draw_grid()
                 self.draw_clues()
                 self.draw_controls()
@@ -731,6 +879,7 @@ class CrosswordGame:
                     self.state = 'complete'
             
             elif self.state == 'complete':
+                self.draw_score_bar()
                 self.draw_grid()
                 self.draw_clues()
                 self.draw_complete_screen()
