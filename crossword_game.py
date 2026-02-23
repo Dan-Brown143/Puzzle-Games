@@ -757,16 +757,16 @@ class CrosswordGame:
         
         # Handle arrow keys FIRST (before hint cell check)
         if event.key == pygame.K_LEFT:
-            self.move_selection(0, -1)
+            self.move_to_next_empty_cell(0, -1)
             return
         elif event.key == pygame.K_RIGHT:
-            self.move_selection(0, 1)
+            self.move_to_next_empty_cell(0, 1)
             return
         elif event.key == pygame.K_UP:
-            self.move_selection(-1, 0)
+            self.move_to_next_empty_cell(-1, 0)
             return
         elif event.key == pygame.K_DOWN:
-            self.move_selection(1, 0)
+            self.move_to_next_empty_cell(1, 0)
             return
         
         # Don't allow editing hint cells (but backspace moves back)
@@ -775,9 +775,9 @@ class CrosswordGame:
                 # Move backward when backspacing on hint
                 if self.selected_word:
                     if self.selected_word.direction == 'across':
-                        self.move_selection(0, -1)
+                        self.move_to_next_empty_cell(0, -1)
                     else:
-                        self.move_selection(-1, 0)
+                        self.move_to_next_empty_cell(-1, 0)
             elif event.unicode.isalpha():
                 # Move to next cell if trying to type on hint
                 if self.selected_word:
@@ -793,9 +793,9 @@ class CrosswordGame:
             # Move backward in the word direction
             if self.selected_word:
                 if self.selected_word.direction == 'across':
-                    self.move_selection(0, -1)
+                    self.move_to_next_empty_cell(0, -1)
                 else:
-                    self.move_selection(-1, 0)
+                    self.move_to_next_empty_cell(-1, 0)
         elif event.key == pygame.K_DELETE:
             self.user_grid[row][col] = ''
         elif event.unicode.isalpha():
