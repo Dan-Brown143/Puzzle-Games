@@ -324,29 +324,54 @@ class CrosswordGame:
         self.hint_button = None
     
     def load_words(self) -> List[Dict]:
+        all_words = []
+        
         try:
-            with open('crossword_words.json', 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except FileNotFoundError:
-            print("ERROR: crossword_words.json not found!")
-            # Return default words if file doesn't exist
-            return [
-                {"word": "python", "clue": "Popular programming language", "category": "Technology"},
-                {"word": "game", "clue": "Something played for fun", "category": "Entertainment"},
-                {"word": "puzzle", "clue": "Brain teaser", "category": "Entertainment"},
-                {"word": "computer", "clue": "Electronic device for processing data", "category": "Technology"},
-                {"word": "music", "clue": "Organized sound", "category": "Arts"},
-                {"word": "science", "clue": "Study of the natural world", "category": "Education"},
-                {"word": "history", "clue": "Study of past events", "category": "Education"},
-                {"word": "guitar", "clue": "Six-stringed instrument", "category": "Arts"},
-                {"word": "soccer", "clue": "Popular sport played with feet", "category": "Sports"},
-                {"word": "basketball", "clue": "Sport with hoops and a ball", "category": "Sports"},
-                {"word": "painting", "clue": "Art created with colors", "category": "Arts"},
-                {"word": "novel", "clue": "Long fictional story", "category": "Entertainment"},
-                {"word": "ocean", "clue": "Large body of salt water", "category": "Nature"},
-                {"word": "mountain", "clue": "Large natural elevation", "category": "Nature"},
-                {"word": "forest", "clue": "Large area covered with trees", "category": "Nature"},
-            ]
+            import os
+            categories_folder = 'word_categories'
+            
+            # Check if folder exists
+            if not os.path.exists(categories_folder):
+                print(f"ERROR: {categories_folder} folder not found!")
+                return self.get_default_words()
+            
+            # Load each JSON file in the folder
+            for filename in os.listdir(categories_folder):
+                if filename.endswith('.json'):
+                    filepath = os.path.join(categories_folder, filename)
+                    try:
+                        with open(filepath, 'r', encoding='utf-8') as f:
+                            words = json.load(f)
+                            all_words.extend(words)
+                            print(f"Loaded {len(words)} words from {filename}")
+                    except Exception as e:
+                        print(f"Error loading {filename}: {e}")
+            
+            if not all_words:
+                print("No words loaded from files, using defaults")
+                return self.get_default_words()
+            
+            print(f"Total words loaded: {len(all_words)}")
+            return all_words
+            
+        except Exception as e:
+            print(f"Error loading word files: {e}")
+            return self.get_default_words()
+        
+    def get_default_words(self) -> List[Dict]:
+        """Return default words if files can't be loaded"""
+        return [
+            {"word": "python", "clue": "Popular programming language", "category": "Technology"},
+            {"word": "game", "clue": "Something played for fun", "category": "Entertainment"},
+            {"word": "puzzle", "clue": "Brain teaser", "category": "Entertainment"},
+            {"word": "computer", "clue": "Electronic device for processing data", "category": "Technology"},
+            {"word": "music", "clue": "Organized sound", "category": "Music"},
+            {"word": "science", "clue": "Study of the natural world", "category": "Science"},
+            {"word": "history", "clue": "Study of past events", "category": "History"},
+            {"word": "guitar", "clue": "Six-stringed instrument", "category": "Music"},
+            {"word": "soccer", "clue": "Popular sport played with feet", "category": "Sports"},
+            {"word": "basketball", "clue": "Sport with hoops and a ball", "category": "Sports"},
+        ]
     
     def load_high_score(self) -> int:
         try:
